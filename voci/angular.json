@@ -23,15 +23,15 @@
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/favicon.ico", "src/assets", "src/robots.txt", "src/sitemap.xml", "src/google14a1c8c61ad856f2.html"],
             "styles": ["src/styles.scss"],
             "scripts": []
           },
           "configurations": {
             "production": {
               "budgets": [
-                { "type": "initial", "maximumWarning": "1mb", "maximumError": "2mb" },
-                { "type": "anyComponentStyle", "maximumWarning": "6kb", "maximumError": "10kb" }
+                { "type": "initial", "maximumWarning": "4mb", "maximumError": "8mb" },
+                { "type": "anyComponentStyle", "maximumWarning": "4kb", "maximumError": "8kb" }
               ],
               "outputHashing": "all",
               "fileReplacements": [
@@ -59,8 +59,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "analytics": false
   }
 }

@@ -69,10 +69,13 @@ import { environment } from '../../../environments/environment';
               <span class="spec-key eyebrow" style="font-size:10px">Material</span>
               <span class="spec-val">{{ product()!.material }}</span>
             </div>
+            
+          @if (product()!.dimensions) {
             <div class="spec-item">
               <span class="spec-key eyebrow" style="font-size:10px">Përmasa</span>
               <span class="spec-val">{{ product()!.dimensions }}</span>
             </div>
+          }
           </div>
 
           @if (product()!.description) {
@@ -102,12 +105,6 @@ import { environment } from '../../../environments/environment';
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
               Shiko punime të tjera
             </a>
-          </div>
-
-          <!-- SHARE NOTE -->
-          <div class="share-note font-mono">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Linku i këtij punimi bashkëngjitur në mesazh automatikisht
           </div>
         </div>
       </div>

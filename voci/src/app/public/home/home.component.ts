@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
@@ -18,6 +18,7 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
         <a routerLink="/" class="logo">VOCI</a>
         <div class="nav-links">
           <a href="#punimet" class="nav-link">Punimet</a>
+          <a routerLink="/rreth-nesh" class="nav-link">Rreth Nesh</a>
           <a href="#kontakt" class="nav-link">Kontakt</a>
           <a [href]="callLink()" class="btn btn-ghost btn-sm btn-pill nav-call">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -39,6 +40,7 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
       @if (menuOpen()) {
         <div class="mobile-menu">
           <a href="#punimet" class="mobile-link" (click)="menuOpen.set(false)">Punimet</a>
+          <a routerLink="/rreth-nesh" class="mobile-link" (click)="menuOpen.set(false)">Rreth Nesh</a>
           <a href="#kontakt" class="mobile-link" (click)="menuOpen.set(false)">Kontakt</a>
           <a [href]="callLink()" class="mobile-link call-green">📞 Telefono</a>
           <a [href]="waLink('Informacion i përgjithshëm')" target="_blank" rel="noopener" class="mobile-link wa-green">
@@ -68,11 +70,25 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
         </div>
         <div class="hero-visual">
           @if (featuredProduct()) {
-            <img [src]="featuredProduct()!.images[0]?.url" [alt]="featuredProduct()!.title" class="hero-img"/>
+            <div class="hero-carousel">
+              @for (p of featuredProducts(); track p.id; let i = $index) {
+                <div class="hero-slide" [class.active]="heroSlide() === i">
+                  <img [src]="p.images[0]?.url" [alt]="p.title" class="hero-img"/>
+                </div>
+              }
+            </div>
             <div class="hero-tag">
               <span class="eyebrow">Punë e fundit</span>
               <span class="hero-tag-title">{{ featuredProduct()!.title }}</span>
             </div>
+            @if (featuredProducts().length > 1) {
+              <div class="hero-dots">
+                @for (p of featuredProducts(); track p.id; let i = $index) {
+                  <button class="hero-dot" [class.active]="heroSlide() === i"
+                          (click)="setHeroSlide(i)"></button>
+                }
+              </div>
+            }
           } @else {
             <div class="hero-img-placeholder">
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
@@ -151,10 +167,12 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
                     <span class="spec-hole"></span>
                     <div class="spec-content">
                       <span class="spec-line">{{ p.material }}</span>
-                      <span class="spec-line spec-dims">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3H3v18M3 21l4-4m0 0l4 4m-4-4v-4"/></svg>
-                        {{ p.dimensions }}
-                      </span>
+                      @if (p.dimensions) {
+                        <span class="spec-line spec-dims">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3H3v18M3 21l4-4m0 0l4 4m-4-4v-4"/></svg>
+                          {{ p.dimensions }}
+                        </span>
+                      }
                     </div>
                   </div>
                   <div class="card-footer">
@@ -232,10 +250,14 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     .hero-sub { color:var(--text-muted); font-size:16px; line-height:1.75; max-width:440px; margin-bottom:2rem; }
     .hero-actions { display:flex; gap:14px; flex-wrap:wrap; }
     .hero-visual { border-radius:var(--radius-lg); overflow:hidden; aspect-ratio:4/5; border:1px solid var(--line); position:relative; background:var(--surface); }
+    .hero-carousel { position:absolute; inset:0; }
+    .hero-slide { position:absolute; inset:0; opacity:0; transition:opacity .8s ease; &.active { opacity:1; } }
     .hero-img { width:100%; height:100%; object-fit:cover; filter:saturate(.9) contrast(1.05); }
     .hero-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-    .hero-tag { position:absolute; bottom:18px; left:18px; background:rgba(30,24,18,.88); backdrop-filter:blur(4px); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 14px; display:flex; flex-direction:column; gap:4px; }
+    .hero-tag { position:absolute; bottom:18px; left:18px; background:rgba(30,24,18,.88); backdrop-filter:blur(4px); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px 14px; display:flex; flex-direction:column; gap:4px; z-index:2; }
     .hero-tag-title { font-family:var(--font-display); font-size:14px; font-weight:600; }
+    .hero-dots { position:absolute; bottom:18px; right:18px; display:flex; gap:6px; z-index:2; }
+    .hero-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.35); border:none; cursor:pointer; padding:0; transition:background var(--transition), transform var(--transition); &.active { background:#fff; transform:scale(1.25); } }
 
     .filter-bar-wrap { position:sticky; top:66px; z-index:40; background:var(--bg); border-bottom:1px solid var(--line); padding:14px 0; }
     .filter-bar { display:flex; align-items:center; gap:10px; }
@@ -322,15 +344,17 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     }
   `]
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private svc = inject(ProductService);
   categories = signal<Category[]>([]);
   allProducts = signal<Product[]>([]);
   loading = signal(true);
   activeCategory = signal<string>('all');
   menuOpen = signal(false);
+  heroSlide = signal(0);
   year = new Date().getFullYear();
   waSvg = WA_SVG;
+  private heroTimer: ReturnType<typeof setInterval> | null = null;
 
   // Carousel state: productId -> slideIndex
   activeSlide: Record<string, number> = {};
@@ -340,10 +364,18 @@ export class HomeComponent implements OnInit {
     return cat === 'all' ? this.allProducts() : this.allProducts().filter(p => p.categoryId === cat);
   });
 
-  featuredProduct = computed(() =>
-    this.allProducts().find(p => p.featured && p.images.length > 0) ||
-    this.allProducts().find(p => p.images.length > 0) || null
+  // Të gjitha punimet me featured=true dhe me foto — për hero carousel
+  featuredProducts = computed(() =>
+    this.allProducts().filter(p => p.featured && p.images.length > 0)
   );
+
+  // Punimi aktual në hero sipas slideIndex
+  featuredProduct = computed(() => {
+    const list = this.featuredProducts();
+    if (list.length > 0) return list[this.heroSlide() % list.length];
+    // Fallback: punimi i parë me foto nëse asnjë nuk është featured
+    return this.allProducts().find(p => p.images.length > 0) || null;
+  });
 
   ngOnInit() {
     this.svc.getCategories().subscribe(cats => this.categories.set(cats));
@@ -355,7 +387,28 @@ export class HomeComponent implements OnInit {
       }));
       this.allProducts.set(withNames);
       this.loading.set(false);
+      this.startHeroTimer();
     });
+  }
+
+  ngOnDestroy() {
+    if (this.heroTimer) clearInterval(this.heroTimer);
+  }
+
+  private startHeroTimer() {
+    if (this.heroTimer) clearInterval(this.heroTimer);
+    this.heroTimer = setInterval(() => {
+      const len = this.featuredProducts().length;
+      if (len > 1) {
+        this.heroSlide.set((this.heroSlide() + 1) % len);
+      }
+    }, 4000); // ndërrohet çdo 4 sekonda
+  }
+
+  setHeroSlide(i: number) {
+    this.heroSlide.set(i);
+    // Rinicio timerin pas klikimit manual
+    this.startHeroTimer();
   }
 
   setCategory(id: string) { this.activeCategory.set(id); }
@@ -377,13 +430,13 @@ export class HomeComponent implements OnInit {
   }
 
   waLink(title: string): string {
-    const msg = `Përshëndetje VOCI! ${title}`;
+    const msg = `Përshëndetje Mobileri VOCI! ${title}`;
     return `https://wa.me/${environment.whatsappNumber}?text=${encodeURIComponent(msg)}`;
   }
 
   waLinkProduct(p: Product): string {
     const url = `${window.location.origin}/produkt/${p.id}`;
-    const msg = `Përshëndetje VOCI! Jam i interesuar për punimin:\n*${p.title}*\n${url}\n\nA mund të marr më shumë informacion?`;
+    const msg = `Përshëndetje Mobileri VOCI! Jam i interesuar për punimin:\n*${p.title}*\n${url}\n\nA mund të marr më shumë informacion?`;
     return `https://wa.me/${environment.whatsappNumber}?text=${encodeURIComponent(msg)}`;
   }
 }

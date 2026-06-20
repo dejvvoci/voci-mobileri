@@ -14,6 +14,11 @@ export const routes: Routes = [
       import('./public/product-detail/product-detail.component')
         .then(m => m.ProductDetailComponent)
   },
+  {
+    path: 'rreth-nesh',
+    loadComponent: () =>
+      import('./public/about/about.component').then(m => m.AboutComponent)
+  },
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────
   {
