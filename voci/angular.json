@@ -23,7 +23,7 @@
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets", "src/robots.txt", "src/sitemap.xml", "src/google14a1c8c61ad856f2.html"],
+            "assets": ["src/favicon.ico", "src/assets", "src/robots.txt", "src/sitemap.xml", "src/google8c1eb515eb568bb1.html"],
             "styles": ["src/styles.scss"],
             "scripts": []
           },
