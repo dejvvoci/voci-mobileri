@@ -14,7 +14,7 @@ export class ProductService {
   private firestore = inject(Firestore);
 
   private readonly CLOUDINARY_URL =
-    `https://api.cloudinary.com/v1_1/${environment.cloudinary.cloudName}/image/upload`;
+    `https://api.cloudinary.com/v1_1/${environment.cloudinary.cloudName}/auto/upload`;
 
   // ─── CATEGORIES ────────────────────────────────────────────────────────────
 
@@ -108,11 +108,12 @@ export class ProductService {
     file: File,
     onProgress: (progress: number) => void
   ): Promise<{ url: string; publicId: string }> {
-    const compressed = await this.compressImage(file);
+    const isVideo = file.type.startsWith('video/');
+    const toUpload = isVideo ? file : await this.compressImage(file);
 
     return new Promise((resolve, reject) => {
       const formData = new FormData();
-      formData.append('file', compressed);
+      formData.append('file', toUpload);
       formData.append('upload_preset', environment.cloudinary.uploadPreset);
       formData.append('folder', 'voci/products');
 
@@ -184,7 +185,8 @@ export class ProductService {
           publicId: result.publicId,
           storagePath: result.publicId, // ruajmë publicId edhe këtu për kompatibilitet
           isPrimary: results.length === 0,
-          order: results.length
+          order: results.length,
+          type: files[i].type.startsWith('video/') ? 'video' : 'image'
         });
       } catch {
         uploads[i].status = 'error';

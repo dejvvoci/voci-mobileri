@@ -73,7 +73,11 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
             <div class="hero-carousel">
               @for (p of featuredProducts(); track p.id; let i = $index) {
                 <div class="hero-slide" [class.active]="heroSlide() === i">
-                  <img [src]="p.images[0]?.url" [alt]="p.title" class="hero-img"/>
+                  @if (p.images[0]?.type === 'video') {
+                    <video [src]="p.images[0]?.url" class="hero-img" autoplay muted loop playsinline></video>
+                  } @else {
+                    <img [src]="p.images[0]?.url" [alt]="p.title" class="hero-img"/>
+                  }
                 </div>
               }
             </div>
@@ -135,7 +139,11 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
                   <div class="carousel-track" [style.transform]="'translateX(-' + (activeSlide[p.id!] || 0) * 100 + '%)'">
                     @for (img of p.images; track img.url) {
                       <div class="carousel-slide">
-                        <img [src]="img.url" [alt]="p.title" loading="lazy"/>
+                        @if (img.type === 'video') {
+                          <video [src]="img.url" muted loop playsinline></video>
+                        } @else {
+                          <img [src]="img.url" [alt]="p.title" loading="lazy"/>
+                        }
                       </div>
                     }
                   </div>
@@ -273,7 +281,7 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     .product-card { cursor:default; transition:transform var(--transition), border-color var(--transition); &:hover { transform:translateY(-4px); border-color:var(--accent); } }
     .carousel-wrap { position:relative; aspect-ratio:4/3; overflow:hidden; background:var(--surface-2); }
     .carousel-track { display:flex; height:100%; transition:transform .35s cubic-bezier(.4,0,.2,1); }
-    .carousel-slide { flex-shrink:0; width:100%; height:100%; img { width:100%; height:100%; object-fit:cover; display:block; } }
+    .carousel-slide { flex-shrink:0; width:100%; height:100%; img, video { width:100%; height:100%; object-fit:cover; display:block; } }
 
     .carousel-btn {
       position:absolute; top:50%; transform:translateY(-50%);

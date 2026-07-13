@@ -29,8 +29,12 @@ import { environment } from '../../../environments/environment';
         <div class="gallery-col">
           <!-- MAIN IMAGE -->
           <div class="main-img-wrap">
-            <img [src]="product()!.images[activeImg()]?.url"
-                 [alt]="product()!.title" class="main-img"/>
+            @if (product()!.images[activeImg()]?.type === 'video') {
+              <video [src]="product()!.images[activeImg()]?.url" class="main-img" controls></video>
+            } @else {
+              <img [src]="product()!.images[activeImg()]?.url"
+                   [alt]="product()!.title" class="main-img"/>
+            }
 
             <!-- PREV/NEXT arrows -->
             @if (product()!.images.length > 1) {
@@ -50,7 +54,11 @@ import { environment } from '../../../environments/environment';
               @for (img of product()!.images; track $index) {
                 <button class="thumb" [class.active]="activeImg() === $index"
                         (click)="activeImg.set($index)">
-                  <img [src]="img.url" [alt]="'Foto ' + ($index + 1)"/>
+                  @if (img.type === 'video') {
+                    <video [src]="img.url" muted></video>
+                  } @else {
+                    <img [src]="img.url" [alt]="'Foto ' + ($index + 1)"/>
+                  }
                 </button>
               }
             </div>
@@ -126,7 +134,7 @@ import { environment } from '../../../environments/environment';
 
     /* GALLERY */
     .main-img-wrap { border-radius:var(--radius-md); overflow:hidden; aspect-ratio:4/3; border:1px solid var(--line); position:relative; background:var(--surface-2); }
-    .main-img { width:100%; height:100%; object-fit:cover; display:block; }
+    .main-img { width:100%; height:100%; object-fit:cover; display:block; background:#000; }
 
     .img-arrow {
       position:absolute; top:50%; transform:translateY(-50%);
@@ -142,7 +150,7 @@ import { environment } from '../../../environments/environment';
     .img-counter { position:absolute; bottom:12px; right:12px; background:rgba(30,24,18,.8); color:var(--text-muted); font-size:11px; padding:4px 10px; border-radius:var(--radius-pill); letter-spacing:.05em; }
 
     .thumbs { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-    .thumb { width:72px; height:54px; border-radius:var(--radius-sm); overflow:hidden; border:2px solid var(--line); padding:0; background:none; cursor:pointer; transition:border-color var(--transition); img { width:100%; height:100%; object-fit:cover; } &.active { border-color:var(--accent); } }
+    .thumb { width:72px; height:54px; border-radius:var(--radius-sm); overflow:hidden; border:2px solid var(--line); padding:0; background:none; cursor:pointer; transition:border-color var(--transition); img, video { width:100%; height:100%; object-fit:cover; } &.active { border-color:var(--accent); } }
 
     /* INFO */
     .info-col { display:flex; flex-direction:column; gap:20px; padding-top:8px; }

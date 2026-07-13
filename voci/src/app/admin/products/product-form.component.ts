@@ -78,26 +78,21 @@ import { Category, Product, ProductImage, UploadProgress } from '../../core/mode
         <div class="form-col">
           <div class="form-section card">
             <h3 class="section-title">
-              Imazhet
-              <span class="img-counter-badge font-mono">{{ form.images.length }} / 8</span>
+              Imazhet & Videot
+              <span class="img-counter-badge font-mono">{{ form.images.length }}</span>
             </h3>
-            <p class="section-hint">Maksimum 8 imazhe. Kompresohen automatikisht ~500KB/WebP. Kliko ★ për të caktuar foton kryesore.</p>
+            <p class="section-hint">Imazhet kompresohen automatikisht ~500KB/WebP. Kliko ★ për të caktuar median kryesore.</p>
 
             <!-- UPLOAD DROPZONE -->
-            <div class="dropzone" [class.drag-over]="dragOver()" [class.dropzone-full]="form.images.length >= 8"
+            <div class="dropzone" [class.drag-over]="dragOver()"
                  (dragover)="$event.preventDefault(); dragOver.set(true)"
                  (dragleave)="dragOver.set(false)"
                  (drop)="onDrop($event)"
-                 (click)="form.images.length < 8 && fileInput.click()">
-              @if (form.images.length >= 8) {
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                <p class="dropzone-text" style="color:var(--text-faint)">Limite i arritur (8/8)</p>
-              } @else {
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p class="dropzone-text">Tërhiq imazhet këtu ose <span>kliko për të zgjedhur</span></p>
-                <p class="dropzone-hint">JPG, PNG, WebP · Mbeten {{ 8 - form.images.length }} vende</p>
-              }
-              <input #fileInput type="file" accept="image/*" multiple style="display:none"
+                 (click)="fileInput.click()">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p class="dropzone-text">Tërhiq imazhet/videot këtu ose <span>kliko për të zgjedhur</span></p>
+              <p class="dropzone-hint">JPG, PNG, WebP, MP4, MOV, WebM</p>
+              <input #fileInput type="file" accept="image/*,video/*" multiple style="display:none"
                      (change)="onFileSelect($event)"/>
             </div>
 
@@ -127,7 +122,11 @@ import { Category, Product, ProductImage, UploadProgress } from '../../core/mode
               <div class="img-grid">
                 @for (img of form.images; track img.storagePath; let i = $index) {
                   <div class="img-item" [class.primary]="img.isPrimary">
-                    <img [src]="img.url" [alt]="'Foto ' + (i+1)"/>
+                    @if (img.type === 'video') {
+                      <video [src]="img.url" muted></video>
+                    } @else {
+                      <img [src]="img.url" [alt]="'Foto ' + (i+1)"/>
+                    }
                     @if (img.isPrimary) {
                       <span class="primary-badge">Kryesore</span>
                     }
@@ -223,7 +222,7 @@ import { Category, Product, ProductImage, UploadProgress } from '../../core/mode
       position:relative; aspect-ratio:4/3; border-radius:var(--radius-sm);
       overflow:hidden; border:2px solid var(--line);
       &.primary { border-color:var(--accent); }
-      img { width:100%; height:100%; object-fit:cover; }
+      img, video { width:100%; height:100%; object-fit:cover; }
     }
     .primary-badge { position:absolute; top:6px; left:6px; background:var(--accent); color:#1A1208; font-size:10px; font-weight:700; padding:3px 7px; border-radius:var(--radius-pill); }
     .img-actions { position:absolute; top:6px; right:6px; display:flex; gap:5px; opacity:0; transition:opacity var(--transition); }
@@ -291,21 +290,17 @@ export class ProductFormComponent implements OnInit {
     e.preventDefault();
     this.dragOver.set(false);
     const files = Array.from(e.dataTransfer?.files || [])
-      .filter(f => f.type.startsWith('image/'));
+      .filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
     this.uploadFiles(files);
   }
 
   async uploadFiles(files: File[]) {
     if (!files.length) return;
-    const MAX_IMAGES = 8;
-    const available = MAX_IMAGES - this.form.images.length;
-    if (available <= 0) { this.showToast('Ke arritur limitin prej 8 imazhesh.', 'error'); return; }
-    const toUpload = files.slice(0, available);
 
     this.uploading.set(true);
 
     const newImages = await this.svc.uploadMultipleImages(
-      toUpload,
+      files,
       (prog) => this.uploads.set(prog)
     );
 

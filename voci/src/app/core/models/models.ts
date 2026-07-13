@@ -28,6 +28,7 @@ export interface ProductImage {
   storagePath: string;   // I njëjtë me publicId, për kompatibilitet
   isPrimary: boolean;
   order: number;
+  type?: 'image' | 'video'; // 'image' nëse mungon (kompatibilitet me të dhëna të vjetra)
 }
 
 export interface AdminUser {

@@ -95,7 +95,11 @@ import { Category, Product } from '../../core/models/models';
               <tr>
                 <td>
                   <div class="table-thumb">
-                    <img [src]="p.images[0]?.url || placeholder" [alt]="p.title" loading="lazy"/>
+                    @if (p.images[0]?.type === 'video') {
+                      <video [src]="p.images[0]?.url" muted></video>
+                    } @else {
+                      <img [src]="p.images[0]?.url || placeholder" [alt]="p.title" loading="lazy"/>
+                    }
                   </div>
                 </td>
                 <td>
@@ -218,7 +222,7 @@ import { Category, Product } from '../../core/models/models';
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--surface-2); }
 
-    .table-thumb { width: 52px; height: 40px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); img { width: 100%; height: 100%; object-fit: cover; } }
+    .table-thumb { width: 52px; height: 40px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); img, video { width: 100%; height: 100%; object-fit: cover; } }
     .product-name { display: block; font-weight: 500; font-size: 14px; }
     .product-material { display: block; font-size: 11px; color: var(--text-faint); margin-top: 3px; }
     .price-chip { background: rgba(200,145,60,.12); color: var(--accent); font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: var(--radius-pill); }
