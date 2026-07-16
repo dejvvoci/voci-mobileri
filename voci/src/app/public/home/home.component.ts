@@ -387,7 +387,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private svc = inject(ProductService);
   favorites = inject(FavoritesService);
   categories = signal<Category[]>([]);
-  allProducts = signal<Product[]>([]);
+  private rawProducts = signal<Product[]>([]);
   loading = signal(true);
   activeCategory = signal<string>('all');
   menuOpen = signal(false);
@@ -399,6 +399,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Carousel state: productId -> slideIndex
   activeSlide: Record<string, number> = {};
+
+  // Rikalkulohet sa herë ndryshojnë produktet OSE kategoritë — shmang gjendjen ku
+  // categoryName mbetet ID-ja e papërpunuar nëse kategoritë ngarkohen pas produkteve.
+  allProducts = computed(() => {
+    const cats = this.categories();
+    return this.rawProducts().map(p => ({
+      ...p,
+      categoryName: cats.find(c => c.id === p.categoryId)?.name || p.categoryId
+    }));
+  });
 
   filteredProducts = computed(() => {
     const cat = this.activeCategory();
@@ -421,12 +431,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.svc.getCategories().subscribe(cats => this.categories.set(cats));
     this.svc.getProducts().subscribe(products => {
-      const cats = this.categories();
-      const withNames = products.map(p => ({
-        ...p,
-        categoryName: cats.find(c => c.id === p.categoryId)?.name || p.categoryId
-      }));
-      this.allProducts.set(withNames);
+      this.rawProducts.set(products);
       this.loading.set(false);
       this.startHeroTimer();
     });
