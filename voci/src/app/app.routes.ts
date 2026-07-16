@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./public/about/about.component').then(m => m.AboutComponent)
   },
+  {
+    path: 'lokacioni',
+    loadComponent: () =>
+      import('./public/location/location.component').then(m => m.LocationComponent)
+  },
 
   // ─── ADMIN ────────────────────────────────────────────────────────────────
   {

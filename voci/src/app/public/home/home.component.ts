@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { FavoritesPanelComponent } from '../../shared/favorites-panel.component';
 import { Category, Product } from '../../core/models/models';
 import { environment } from '../../../environments/environment';
 
@@ -10,7 +12,7 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FavoritesPanelComponent],
   template: `
     <!-- NAV -->
     <nav class="nav">
@@ -19,7 +21,12 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
         <div class="nav-links">
           <a href="#punimet" class="nav-link">Punimet</a>
           <a routerLink="/rreth-nesh" class="nav-link">Rreth Nesh</a>
+          <a routerLink="/lokacioni" class="nav-link">Lokacioni</a>
           <a href="#kontakt" class="nav-link">Kontakt</a>
+          <button class="nav-fav" (click)="favPanelOpen.set(true)" aria-label="Të preferuarat">
+            <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="favorites.ids().length ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            @if (favorites.ids().length > 0) { <span class="nav-fav-badge">{{ favorites.ids().length }}</span> }
+          </button>
           <a [href]="callLink()" class="btn btn-ghost btn-sm btn-pill nav-call">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.7A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
@@ -41,7 +48,11 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
         <div class="mobile-menu">
           <a href="#punimet" class="mobile-link" (click)="menuOpen.set(false)">Punimet</a>
           <a routerLink="/rreth-nesh" class="mobile-link" (click)="menuOpen.set(false)">Rreth Nesh</a>
+          <a routerLink="/lokacioni" class="mobile-link" (click)="menuOpen.set(false)">Lokacioni</a>
           <a href="#kontakt" class="mobile-link" (click)="menuOpen.set(false)">Kontakt</a>
+          <button class="mobile-link fav-link" (click)="menuOpen.set(false); favPanelOpen.set(true)">
+            🤍 Të preferuarat @if (favorites.ids().length > 0) { ({{ favorites.ids().length }}) }
+          </button>
           <a [href]="callLink()" class="mobile-link call-green">📞 Telefono</a>
           <a [href]="waLink('Informacion i përgjithshëm')" target="_blank" rel="noopener" class="mobile-link wa-green">
             WhatsApp
@@ -166,6 +177,11 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
                   }
 
                   <span class="category-badge badge badge-muted">{{ p.categoryName }}</span>
+                  <button class="fav-toggle" [class.active]="favorites.has(p.id!)"
+                          (click)="favorites.toggle(p.id!); $event.stopPropagation()"
+                          [attr.aria-label]="favorites.has(p.id!) ? 'Hiq nga të preferuarat' : 'Shto te të preferuarat'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="favorites.has(p.id!) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                  </button>
                 </div>
 
                 <!-- CARD BODY -->
@@ -237,6 +253,8 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       </a>
     </div>
+
+    <app-favorites-panel [open]="favPanelOpen()" (close)="favPanelOpen.set(false)"/>
   `,
   styles: [`
     .nav { position:sticky; top:0; z-index:50; background:rgba(30,24,18,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
@@ -246,6 +264,9 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     .nav-link { font-size:14px; color:var(--text-muted); transition:color var(--transition); &:hover { color:var(--text); } }
     .nav-call { color:var(--text-muted); border-color:var(--line); }
     .nav-wa { gap:7px; }
+    .nav-fav { position:relative; background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; display:flex; &:hover { color:var(--accent); } }
+    .nav-fav-badge { position:absolute; top:-4px; right:-4px; background:var(--accent); color:#1A1208; font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .fav-link { background:none; border:none; text-align:left; cursor:pointer; font-family:inherit; }
     .menu-btn { display:none; background:none; border:none; color:var(--text); padding:4px; }
     .mobile-menu { border-top:1px solid var(--line); padding:16px 24px; display:flex; flex-direction:column; gap:14px; }
     .mobile-link { font-size:15px; color:var(--text-muted); }
@@ -301,6 +322,16 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.4); border:none; cursor:pointer; padding:0; transition:background var(--transition), transform var(--transition); &.active { background:#fff; transform:scale(1.3); } }
 
     .category-badge { position:absolute; top:10px; left:10px; z-index:2; }
+    .fav-toggle {
+      position:absolute; top:8px; right:8px; z-index:2;
+      width:30px; height:30px; border-radius:50%;
+      background:rgba(30,24,18,.75); backdrop-filter:blur(4px);
+      border:1px solid var(--line); color:#fff;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background var(--transition), color var(--transition);
+      &:hover { background:rgba(30,24,18,.95); }
+      &.active { color:var(--rust); }
+    }
 
     .card-body { padding:18px; display:flex; flex-direction:column; gap:12px; }
     .card-title { font-size:19px; font-weight:600; margin:0; line-height:1.2; }
@@ -354,11 +385,13 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private svc = inject(ProductService);
+  favorites = inject(FavoritesService);
   categories = signal<Category[]>([]);
   allProducts = signal<Product[]>([]);
   loading = signal(true);
   activeCategory = signal<string>('all');
   menuOpen = signal(false);
+  favPanelOpen = signal(false);
   heroSlide = signal(0);
   year = new Date().getFullYear();
   waSvg = WA_SVG;
@@ -443,7 +476,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   waLinkProduct(p: Product): string {
-    const url = `${window.location.origin}/produkt/${p.id}`;
+    const url = `${environment.siteUrl}/produkt/${p.id}`;
     const msg = `Përshëndetje Mobileri VOCI! Jam i interesuar për punimin:\n*${p.title}*\n${url}\n\nA mund të marr më shumë informacion?`;
     return `https://wa.me/${environment.whatsappNumber}?text=${encodeURIComponent(msg)}`;
   }

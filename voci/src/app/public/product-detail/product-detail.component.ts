@@ -2,13 +2,15 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { FavoritesPanelComponent } from '../../shared/favorites-panel.component';
 import { Product } from '../../core/models/models';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FavoritesPanelComponent],
   template: `
     <nav class="top-nav">
       <div class="container">
@@ -16,7 +18,13 @@ import { environment } from '../../../environments/environment';
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Kthehu te punimet
         </a>
-        <a routerLink="/" class="logo font-display">VOCI</a>
+        <div class="top-nav-right">
+          <button class="nav-fav" (click)="favPanelOpen.set(true)" aria-label="Të preferuarat">
+            <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="favorites.ids().length ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            @if (favorites.ids().length > 0) { <span class="nav-fav-badge">{{ favorites.ids().length }}</span> }
+          </button>
+          <a routerLink="/" class="logo font-display">VOCI</a>
+        </div>
       </div>
     </nav>
 
@@ -35,6 +43,12 @@ import { environment } from '../../../environments/environment';
               <img [src]="product()!.images[activeImg()]?.url"
                    [alt]="product()!.title" class="main-img"/>
             }
+
+            <button class="fav-toggle" [class.active]="favorites.has(product()!.id!)"
+                    (click)="favorites.toggle(product()!.id!)"
+                    [attr.aria-label]="favorites.has(product()!.id!) ? 'Hiq nga të preferuarat' : 'Shto te të preferuarat'">
+              <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="favorites.has(product()!.id!) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            </button>
 
             <!-- PREV/NEXT arrows -->
             @if (product()!.images.length > 1) {
@@ -116,18 +130,47 @@ import { environment } from '../../../environments/environment';
           </div>
         </div>
       </div>
+
+      <!-- RELATED PRODUCTS -->
+      @if (related().length > 0) {
+        <div class="container related-section">
+          <h2 class="related-title font-display">Shiko edhe këto</h2>
+          <div class="related-grid">
+            @for (r of related(); track r.id) {
+              <a [routerLink]="['/produkt', r.id]" class="related-card card">
+                <div class="related-img-wrap">
+                  @if (r.images[0]?.type === 'video') {
+                    <video [src]="r.images[0]?.url" muted></video>
+                  } @else {
+                    <img [src]="r.images[0]?.url" [alt]="r.title" loading="lazy"/>
+                  }
+                </div>
+                <div class="related-body">
+                  <h3 class="related-card-title">{{ r.title }}</h3>
+                  <span class="related-card-material font-mono">{{ r.material }}</span>
+                </div>
+              </a>
+            }
+          </div>
+        </div>
+      }
     } @else {
       <div class="container" style="padding:80px 24px;text-align:center">
         <p style="color:var(--text-muted)">Punimi nuk u gjet.</p>
         <a routerLink="/" class="btn btn-ghost" style="margin-top:16px">Kthehu</a>
       </div>
     }
+
+    <app-favorites-panel [open]="favPanelOpen()" (close)="favPanelOpen.set(false)"/>
   `,
   styles: [`
     .top-nav { border-bottom:1px solid var(--line); }
     .top-nav .container { display:flex; align-items:center; justify-content:space-between; height:58px; }
     .back-link { display:flex; align-items:center; gap:6px; color:var(--text-muted); font-size:14px; transition:color var(--transition); &:hover { color:var(--text); } }
+    .top-nav-right { display:flex; align-items:center; gap:14px; }
     .logo { font-size:20px; font-weight:700; color:var(--accent); letter-spacing:.08em; }
+    .nav-fav { position:relative; background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; display:flex; &:hover { color:var(--accent); } }
+    .nav-fav-badge { position:absolute; top:-4px; right:-4px; background:var(--accent); color:#1A1208; font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
     .loading-wrap { display:flex; justify-content:center; padding:80px 0; }
 
     .detail-layout { display:grid; grid-template-columns:1fr 1fr; gap:56px; padding:48px 24px 80px; align-items:start; }
@@ -148,6 +191,16 @@ import { environment } from '../../../environments/environment';
     .prev { left:12px; }
     .next { right:12px; }
     .img-counter { position:absolute; bottom:12px; right:12px; background:rgba(30,24,18,.8); color:var(--text-muted); font-size:11px; padding:4px 10px; border-radius:var(--radius-pill); letter-spacing:.05em; }
+    .fav-toggle {
+      position:absolute; top:12px; left:12px; z-index:2;
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(30,24,18,.8); backdrop-filter:blur(4px);
+      border:1px solid var(--line); color:#fff;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background var(--transition), color var(--transition);
+      &:hover { background:rgba(30,24,18,.95); }
+      &.active { color:var(--rust); }
+    }
 
     .thumbs { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
     .thumb { width:72px; height:54px; border-radius:var(--radius-sm); overflow:hidden; border:2px solid var(--line); padding:0; background:none; cursor:pointer; transition:border-color var(--transition); img, video { width:100%; height:100%; object-fit:cover; } &.active { border-color:var(--accent); } }
@@ -171,25 +224,47 @@ import { environment } from '../../../environments/environment';
 
     .share-note { font-size:11px; color:var(--text-faint); display:flex; align-items:center; gap:6px; letter-spacing:.02em; }
 
+    /* RELATED PRODUCTS */
+    .related-section { padding:0 24px 80px; }
+    .related-title { font-size:22px; font-weight:600; margin:0 0 20px; }
+    .related-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+    .related-card { display:block; overflow:hidden; transition:transform var(--transition), border-color var(--transition); &:hover { transform:translateY(-4px); border-color:var(--accent); } }
+    .related-img-wrap { aspect-ratio:4/3; background:var(--surface-2); img, video { width:100%; height:100%; object-fit:cover; display:block; } }
+    .related-body { padding:14px; }
+    .related-card-title { font-size:15px; font-weight:600; margin:0 0 4px; line-height:1.25; }
+    .related-card-material { font-size:11px; color:var(--text-faint); }
+
     @media (max-width:768px) {
       .detail-layout { grid-template-columns:1fr; gap:28px; padding:28px 18px 60px; }
       .img-arrow { opacity:1; }
+      .related-section { padding:0 18px 60px; }
+      .related-grid { grid-template-columns:repeat(2,1fr); }
     }
   `]
 })
 export class ProductDetailComponent implements OnInit {
   private svc = inject(ProductService);
   private route = inject(ActivatedRoute);
+  favorites = inject(FavoritesService);
 
   product = signal<Product | null>(null);
   loading = signal(true);
   activeImg = signal(0);
+  related = signal<Product[]>([]);
+  favPanelOpen = signal(false);
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.svc.getProduct(id).subscribe(p => {
       this.product.set(p);
       this.loading.set(false);
+      this.loadRelated(p);
+    });
+  }
+
+  private loadRelated(p: Product) {
+    this.svc.getProducts().subscribe(list => {
+      this.related.set(list.filter(x => x.categoryId === p.categoryId && x.id !== p.id).slice(0, 4));
     });
   }
 
@@ -211,7 +286,7 @@ export class ProductDetailComponent implements OnInit {
   waLinkProduct(): string {
     const p = this.product();
     if (!p) return `https://wa.me/${environment.whatsappNumber}`;
-    const url = `${window.location.href}`;
+    const url = `${environment.siteUrl}/produkt/${p.id}`;
     const msg = `Përshëndetje VOCI! Jam i interesuar për punimin:\n*${p.title}*\n\nMaterial: ${p.material}\nPërmasa: ${p.dimensions}\n\nShiko punimin: ${url}\n\nA mund të marr më shumë informacion?`;
     return `https://wa.me/${environment.whatsappNumber}?text=${encodeURIComponent(msg)}`;
   }

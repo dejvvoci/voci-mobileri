@@ -12,5 +12,6 @@ export const environment = {
     cloudName: "dslrto1ps",
     uploadPreset: "voci_mobileri"
   },
-  whatsappNumber: "355692682180"
+  whatsappNumber: "355692682180",
+  siteUrl: "https://vocimobileri.web.app"
 };
