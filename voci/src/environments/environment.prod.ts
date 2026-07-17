@@ -13,5 +13,5 @@ export const environment = {
     uploadPreset: "voci_mobileri"
   },
   whatsappNumber: "355692682180",
-  siteUrl: "https://vocimobileri.web.app"
+  siteUrl: "https://vocimobileri.com"
 };

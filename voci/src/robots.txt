@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin/login
 
-Sitemap: https://vocimobileri.web.app/sitemap.xml
+Sitemap: https://vocimobileri.com/sitemap.xml

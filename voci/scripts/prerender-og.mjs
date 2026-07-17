@@ -20,7 +20,7 @@ const firebaseConfig = {
   messagingSenderId: '741046042018',
   appId: '1:741046042018:web:a05e47f0882296f4c986fb'
 };
-const SITE_URL = 'https://vocimobileri.web.app';
+const SITE_URL = 'https://vocimobileri.com';
 
 function escapeHtml(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

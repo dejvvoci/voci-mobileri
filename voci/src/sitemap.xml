@@ -2,17 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://vocimobileri.web.app/</loc>
+    <loc>https://vocimobileri.com/</loc>
     <lastmod>2025-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://vocimobileri.web.app/rreth-nesh</loc>
+    <loc>https://vocimobileri.com/rreth-nesh</loc>
     <lastmod>2025-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://vocimobileri.com/lokacioni</loc>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
 </urlset>
