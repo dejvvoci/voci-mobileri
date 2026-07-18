@@ -96,7 +96,7 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
               <span class="eyebrow">Punë e fundit</span>
               <span class="hero-tag-title">{{ featuredProduct()!.title }}</span>
             </div>
-            @if (featuredProducts().length > 1) {
+            @if (featuredProducts().length > 1 && featuredProducts().length <= 8) {
               <div class="hero-dots">
                 @for (p of featuredProducts(); track p.id; let i = $index) {
                   <button class="hero-dot" [class.active]="heroSlide() === i"
@@ -415,10 +415,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     return cat === 'all' ? this.allProducts() : this.allProducts().filter(p => p.categoryId === cat);
   });
 
-  // Të gjitha punimet me featured=true dhe me foto — për hero carousel
-  featuredProducts = computed(() =>
-    this.allProducts().filter(p => p.featured && p.images.length > 0)
-  );
+  // Punimet për hero carousel: preferohen ato të shënuara "featured", por nëse
+  // ka më pak se 2 (p.sh. asnjë ose vetëm një), përdoren të gjitha punimet me foto,
+  // që karuseli të mos ngrijë gjithmonë në të njëjtin punim.
+  featuredProducts = computed(() => {
+    const featured = this.allProducts().filter(p => p.featured && p.images.length > 0);
+    if (featured.length > 1) return featured;
+    return this.allProducts().filter(p => p.images.length > 0);
+  });
 
   // Punimi aktual në hero sipas slideIndex
   featuredProduct = computed(() => {
@@ -446,9 +450,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.heroTimer = setInterval(() => {
       const len = this.featuredProducts().length;
       if (len > 1) {
-        this.heroSlide.set((this.heroSlide() + 1) % len);
+        // Zgjedh një indeks të rastësishëm, duke shmangur përsëritjen e të njëjtit punim
+        let next = Math.floor(Math.random() * len);
+        if (next === this.heroSlide()) next = (next + 1) % len;
+        this.heroSlide.set(next);
       }
-    }, 4000); // ndërrohet çdo 4 sekonda
+    }, 5000); // ndërrohet çdo 5 sekonda
   }
 
   setHeroSlide(i: number) {
