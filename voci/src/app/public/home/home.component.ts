@@ -17,7 +17,10 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
     <!-- NAV -->
     <nav class="nav">
       <div class="container nav-inner">
-        <a routerLink="/" class="logo">VOCI</a>
+        <a routerLink="/" class="logo">
+          <img src="assets/logo-icon.png" alt="" class="logo-icon"/>
+          VOCI
+        </a>
         <div class="nav-links">
           <a href="#punimet" class="nav-link">Punimet</a>
           <a routerLink="/rreth-nesh" class="nav-link">Rreth Nesh</a>
@@ -259,7 +262,8 @@ const WA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentCol
   styles: [`
     .nav { position:sticky; top:0; z-index:50; background:rgba(30,24,18,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
     .nav-inner { display:flex; align-items:center; justify-content:space-between; height:66px; }
-    .logo { font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:.08em; color:var(--accent); }
+    .logo { display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:22px; font-weight:700; letter-spacing:.08em; color:var(--accent); }
+    .logo-icon { height:26px; width:auto; display:block; }
     .nav-links { display:flex; align-items:center; gap:16px; }
     .nav-link { font-size:14px; color:var(--text-muted); transition:color var(--transition); &:hover { color:var(--text); } }
     .nav-call { color:var(--text-muted); border-color:var(--line); }

@@ -23,7 +23,10 @@ import { environment } from '../../../environments/environment';
             <svg width="18" height="18" viewBox="0 0 24 24" [attr.fill]="favorites.ids().length ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
             @if (favorites.ids().length > 0) { <span class="nav-fav-badge">{{ favorites.ids().length }}</span> }
           </button>
-          <a routerLink="/" class="logo font-display">VOCI</a>
+          <a routerLink="/" class="logo font-display">
+            <img src="assets/logo-icon.png" alt="" class="logo-icon"/>
+            VOCI
+          </a>
         </div>
       </div>
     </nav>
@@ -168,7 +171,8 @@ import { environment } from '../../../environments/environment';
     .top-nav .container { display:flex; align-items:center; justify-content:space-between; height:58px; }
     .back-link { display:flex; align-items:center; gap:6px; color:var(--text-muted); font-size:14px; transition:color var(--transition); &:hover { color:var(--text); } }
     .top-nav-right { display:flex; align-items:center; gap:14px; }
-    .logo { font-size:20px; font-weight:700; color:var(--accent); letter-spacing:.08em; }
+    .logo { display:flex; align-items:center; gap:7px; font-size:20px; font-weight:700; color:var(--accent); letter-spacing:.08em; }
+    .logo-icon { height:24px; width:auto; display:block; }
     .nav-fav { position:relative; background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; display:flex; &:hover { color:var(--accent); } }
     .nav-fav-badge { position:absolute; top:-4px; right:-4px; background:var(--accent); color:#1A1208; font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
     .loading-wrap { display:flex; justify-content:center; padding:80px 0; }
